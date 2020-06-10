@@ -1,0 +1,23 @@
+# Docker Compose version
+version: "3"
+
+# Define the services that make up our Application
+services:
+  # The "app" service
+  app:
+   # The build and it’s context, meaning where to get the code from. dot is root
+   build:
+    context: .
+   # Specify the ports to use for the “app”
+   ports:
+    - "8000:8000"
+   # Allows us to get the updates we make in our project get into the Docker Image,
+   # in real time -> Hot reload
+   volumes:
+    - ./app:/app
+   # Is used to run our Application in our Docker Container
+   # The ">" means that you're specifying the rest of the line on the next line,
+   # because commands to run in general can be very long so you'll want to use new lines
+   # Specifies the server in the runserver command which matches the one from the docker container.
+   command: >
+    sh -c "python manage.py runserver 0.0.0.0:8000"
