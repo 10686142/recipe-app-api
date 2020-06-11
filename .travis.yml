@@ -1,0 +1,23 @@
+# Bascially whenever we push a change to Github Travis is going to;
+# 1) Startup a Python server with python 3.6
+# 2) This server is going to make the Docker service available
+# 3) Then it's going to use pip to install docker-compose
+# 4) And finally run our script to test and lint the code.
+language: python
+
+# The version we need to use, doesn't matter though because,
+# We're running the python version from the Docker Image
+# 3.6 was the last main stable version at the time of recording
+python:
+  - "3.6"
+
+services:
+  - docker
+
+# Script to run before it does anything
+before_script: pip install docker-compose
+
+# flake8 is the linting tool we're using
+# Bscially if this fails, the build will fail and send us a notification
+script:
+  - docker-compose run app sh -c "python manage.py test && flake8"
