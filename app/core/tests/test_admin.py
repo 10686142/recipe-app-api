@@ -53,7 +53,6 @@ class AdminSiteTests(TestCase):
         # Check if the page exists
         self.assertEqual(response.status_code, 200)
 
-
     def test_change_page(self):
         """Test that the user edit page works"""
         # Generate the url our list users page

@@ -5,6 +5,7 @@ from django.utils.translation import gettext as _
 
 from core import models
 
+
 # Inherite from Django's default UserAdmin
 class UserAdmin(BaseUserAdmin):
     ordering = ['id']
@@ -16,16 +17,11 @@ class UserAdmin(BaseUserAdmin):
         # The top section
         (None, {'fields': ('email', 'password')}),
         (_('Personal Info'), {'fields': ('name',)}),
-        (_
-            ('Permissions'),
-            {
-                'fields':('is_active', 'is_staff', 'is_superuser')
-            }
-        ),
-        (_('Important dates'), {'fields': ('last_login',)})
+        (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser')}),
+        (_('Important dates'), {'fields': ('last_login',)}),
     )
 
-    # From the docs: https://docs.djangoproject.com/en/2.2/topics/auth/customizing/#custom-users-and-django-contrib-admin
+    # Docs: https://docs.djangoproject.com/en/2.2/topics/auth/customizing
     # IMPORTANT: Adding just 1 item in the 'fields' value tuple you need to add a comma!
     add_fieldsets = (
         (None, {
