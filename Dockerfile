@@ -14,8 +14,24 @@ ENV PYTHONUNBUFFERED 1
 # so the docker Image can use it to install the required dependencies.
 COPY ./requirements.txt /requirements.txt
 
+# Uses apline's package manager (apk)
+# --update -> means update first
+# --no-cache -> Don't store the registry index in our Dockerfile
+# We do this because we want to minimize the number of extra files and packages
+# that are included in our docker container. This also means you docker container,
+# has the smallest footprint possible and no possible side effects like security,
+# due to the packages index being cached
+run apk add --update --no-cache postgresql-client
+
+# A temporary build of these depencies, ".tmp-build-deps" is just an alias we gave it
+run apk add --update --no-cache --virtual .tmp-build-deps \
+    gcc libc-dev linux-headers postgresql-dev
+
 # First command to RUN installment of the required dependencies
 RUN pip install -r /requirements.txt
+
+# Remove the temporary docker packes needed for the requirements.txt
+RUN apk del .tmp-build-deps
 
 # Second  RUN command with setting the WORKDIR and
 # COPY’ing the main ./app folder to the Docker Image

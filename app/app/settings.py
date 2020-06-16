@@ -73,11 +73,15 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-
+# We are just grabbing the envirnment variables we set under the,
+# "app" service in the docker.compose.yaml file
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': os.environ.get('DB_HOST'),
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASS'),
     }
 }
 
@@ -120,5 +124,5 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# Set custom User model as Django's User model 
+# Set custom User model as Django's User model
 AUTH_USER_MODEL = 'core.User'

@@ -20,4 +20,32 @@ services:
    # because commands to run in general can be very long so you'll want to use new lines
    # Specifies the server in the runserver command which matches the one from the docker container.
    command: >
-    sh -c "python manage.py runserver 0.0.0.0:8000"
+    sh -c "python manage.py wait_for_db &&
+           python manage.py wait_for_db migrate
+           python manage.py runserver 0.0.0.0:8000"
+
+   # Some environment (global) variables we can use in Django like settings.py
+   environment:
+     # The service running our db, and also means we can access the database via "db"
+     - DB_HOST=db
+     - DB_NAME=app
+     - DB_USER=postgres
+     - DB_PASS=supersecretpassword
+   # This tells docker that the django "app" is dependent on the db, meaning
+   # that the db microservice needs to start up before django starts up and,
+   # it tells the host that this service is available via the network when you use the hostname 'db'
+   depends_on:
+     - db
+
+  # Creates a db service as a seperate microservice
+  db:
+    # Grabs the version 10 the lightweight "alpine" version from docker hub
+    image: postgres:10-alpine
+
+    # The envirmoment (global) variables for accessing and creating the DB
+    # You would add the real encryptes db passwords in a real production in,
+    # your build envirnment like Travis CL or something else.
+    environment:
+      - POSTGRES_DB=app
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=supersecretpassword
