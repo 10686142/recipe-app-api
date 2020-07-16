@@ -10,6 +10,7 @@ from rest_framework import status
 # Constants used for this test
 CREATE_USER_URL = reverse('user:create')
 TOKEN_URL = reverse('user:token')
+ME_URL = reverse('user:me')
 
 
 # The **param is a dynamic list of arguments, meaning
@@ -19,6 +20,63 @@ def create_user(**params):
     return get_user_model().objects.create_user(**params)
 
 
+# A "Private" api needs authentication compared to the "Public"
+class PrivateUserApiTests(TestCase):
+    """Test API requests that require authentication"""
+
+    # Sets up the APIClient
+    def setUp(self):
+        # The authenticated user, used in subsequent test methods
+        self.user = create_user(
+            email='test@vazkirauth.com',
+            password='testpass',
+            name='name'
+        )
+        # Initialize the API Client
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+    def test_retrieve_profile_success(self):
+        """Test retrieving profile for logged in user"""
+        # Get my user info
+        response = self.client.get(ME_URL)
+
+        # Checks the API response code
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # So no checking password since hashed.
+        self.assertEqual(response.data, {
+            'email': self.user.email,
+            'name': self.user.name
+        })
+
+    def test_post_me_not_allowed(self):
+        """Test that POST is not allowed on the url"""
+        response = self.client.post(ME_URL)
+
+        # Make sure we get a not allowed back
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_update_user_profile(self):
+        """Test updating the user profile for authenticated user"""
+        payload = {'password': 'newpass123', 'name': 'new_name'}
+
+        # Make a PATCH to update an existing db row
+        response = self.client.patch(ME_URL, payload)
+
+        # Make sure the self.user is updated to the latest changes
+        self.user.refresh_from_db()
+
+        # And now we want to check if our name change went through
+        self.assertEqual(self.user.name, payload['name'])
+
+        # Also check the password change
+        self.assertTrue(self.user.check_password(payload['password']))
+
+        # Make sure the response was oke.
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
 # A "Public" api doesn't need authentication, so like creating a user
 class PublicUserApiTests(TestCase):
     """Test the users API (public)"""
@@ -26,6 +84,13 @@ class PublicUserApiTests(TestCase):
     # Sets up the APIClient
     def setUp(self):
         self.client = APIClient()
+
+    def test_retrieve_user_unauthorized(self):
+        # Get my user info
+        response = self.client.get(ME_URL)
+
+        # Make sure the url for information about this user is not publicly accesible
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_token_for_user(self):
         """Test that a token is created for the user"""

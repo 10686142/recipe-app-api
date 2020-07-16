@@ -61,3 +61,20 @@ class UserSerializer(serializers.ModelSerializer):
         # This creates our user by using the get_user_model and
         # passing in our serialized data the the create_user function
         return get_user_model().objects.create_user(**validated_data)
+
+    # PUT or PATCH request, PUT updates whole object, PATCH only specified fields
+    def update(self, instance, validated_data):
+        """Update a user, setting the password correctly and return it"""
+        # The .pop methods grabs the element and removes it as well compated to get
+        # You only do need to specify a default value for if it isn't set
+        password = validated_data.pop('password', None)
+
+        # Pass it back to the super withouth the pasword
+        user = super().update(instance, validated_data)
+
+        # Is password is given than update it with the .set_password methods
+        if password:
+            user.set_password(password)
+            user.save()
+
+        return user
