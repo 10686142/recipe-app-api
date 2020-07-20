@@ -24,6 +24,25 @@ class PrivaeTagsApiTest(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(self.user)
 
+    def test_create_tag_successful(self):
+        """Test creating a new tag"""
+        payload = {'name': 'Test tag'}
+        self.client.post(TAGS_URL, payload)
+
+        exists = Tag.objects.filter(
+            user=self.user,
+            name=payload['name']
+        )
+        self.assertTrue(exists)
+
+    def test_create_tag_invalid(self):
+        """Test creating a new tag with invalid payload"""
+        payload = {'name': ''}
+        response = self.client.post(TAGS_URL, payload)
+
+        # Make sure this isn't actually added
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_retrieve_tags(self):
         """Test retrieving tags"""
         # Create the tags to list for current user
