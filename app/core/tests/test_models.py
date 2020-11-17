@@ -63,3 +63,13 @@ class ModelTests(TestCase):
         )
 
         self.assertEqual(str(tag), tag.name)
+
+    # Test that our model is converted correltly into a string representation
+    def test_ingredient_str(self):
+        """Test ingredient string representation"""
+        ingredient = models.Ingredient.objects.create(
+            user=sample_user(),
+            name="Cucumber"
+        )
+
+        self.assertEqual(str(ingredient), ingredient.name)
