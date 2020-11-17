@@ -3,6 +3,35 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.conf import settings
 
 
+class Recipe(models.Model):
+    """The Recipe object"""
+
+    # We use the settings to retieve our auth user model, since we created a custom one
+    # Cascade makes sure this tag is also removed when user is gone
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+
+    # Other required fields
+    title = models.CharField(max_length=255)
+    time_minutes = models.IntegerField()
+    price = models.DecimalField(max_digits=5, decimal_places=2)
+
+    # Optional field
+    link = models.CharField(max_length=255, blank=True)
+
+    # A normal foreign key like user; only 1 user can be assigned to a recipe
+    # ManyToMany -> Each ingredient and tag can also be assigned other recipes
+    # Why use a string as modelname? Because else those models have to be declared above
+    ingredients = models.ManyToManyField('Ingredient')
+    tags = models.ManyToManyField('Tag')
+
+    # Representation when you call str(tag)
+    def __str__(self):
+        return self.title
+
+
 class Ingredient(models.Model):
     """Tag to be used for a recipe"""
     name = models.CharField(max_length=255)
