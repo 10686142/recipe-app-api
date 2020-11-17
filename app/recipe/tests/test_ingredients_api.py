@@ -80,60 +80,23 @@ class PrivateIngredientsApiTest(TestCase):
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['name'], new_ingredient.name)
 
-    # def test_create_tag_successful(self):
-    #     """Test creating a new tag"""
-    #     payload = {'name': 'Test tag'}
-    #     self.client.post(TAGS_URL, payload)
-    #
-    #     exists = Tag.objects.filter(
-    #         user=self.user,
-    #         name=payload['name']
-    #     )
-    #     self.assertTrue(exists)
-    #
-    # def test_create_tag_invalid(self):
-    #     """Test creating a new tag with invalid payload"""
-    #     payload = {'name': ''}
-    #     response = self.client.post(TAGS_URL, payload)
-    #
-    #     # Make sure this isn't actually added
-    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-    #
-    # def test_retrieve_tags(self):
-    #     """Test retrieving tags"""
-    #     # Create the tags to list for current user
-    #     Tag.objects.create(user=self.user, name='Vegan')
-    #     Tag.objects.create(user=self.user, name='Dessert')
-    #
-    #     response = self.client.get(TAGS_URL)
-    #
-    #     # Order reversed alphabetically
-    #     tags = Tag.objects.all().order_by('-name')
-    #
-    #     # Serialzes the tags and thereby also manages the ordering
-    #     # many=true indicates that we're dealing with many objects
-    #     serializer = TagSerializer(tags, many=True)
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #
-    #     # Make sure the lists from the serializer and we added are the same,
-    #     # so same items and same reversed ordering
-    #     self.assertEqual(response.data, serializer.data)
-    #
-    # def test_tags_limited_to_user(self):
-    #     """Test that tags returned are for current authenticated user"""
-    #     # Create a new user so we can assign a tag it, which should
-    #     # not be part of the returned tags from this class's User
-    #     other_user = get_user_model().objects.create_user(
-    #         email='other_user@vazkir.com',
-    #         password='PasswordTest123'
-    #     )
-    #     # Add tag to other user
-    #     Tag.objects.create(user=other_user, name="Fruity")
-    #
-    #     # Add a tag to the authenticated user to make sure only the new one is listed
-    #     new_tag = Tag.objects.create(user=self.user, name="Comfort Food")
-    #
-    #     response = self.client.get(TAGS_URL)
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     self.assertEqual(len(response.data), 1)
-    #     self.assertEqual(response.data[0]['name'], new_tag.name)
+    def test_create_ingredient_successful(self):
+        """Test creating a new ingredient"""
+        payload = {'name': 'Test ingredient Saltie'}
+        self.client.post(INGREDIENTS_URL, payload)
+
+        # Try to find the model we just created by new and user
+        exists = Ingredient.objects.filter(
+            user=self.user,
+            name=payload['name']
+        ).exists()
+
+        self.assertTrue(exists)
+
+    def test_create_ingredient_invalid(self):
+        """Test creating a new ingredient with invalid payload"""
+        payload = {'name': ''}
+        response = self.client.post(INGREDIENTS_URL, payload)
+
+        # Make sure this isn't actually added
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
